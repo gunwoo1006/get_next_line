@@ -6,7 +6,7 @@
 /*   By: gkim <gkim@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/19 13:38:49 by gkim              #+#    #+#             */
-/*   Updated: 2026/02/19 15:39:18 by gkim             ###   ########.fr       */
+/*   Updated: 2026/05/24 16:33:27 by gkim             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ char	*ft_strjoin(char const *s1, char const *s2)
 		return (ft_strdup(s2));
 	if (!s2)
 		return (ft_strdup(s1));
-	res = malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
+	res = (char *)malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
 	if (!res)
 		return (NULL);
 	i = 0;
@@ -59,6 +59,8 @@ size_t	ft_strlen(const char *s)
 {
 	size_t	i;
 
+	if (!s)
+		return (0);
 	i = 0;
 	while (s[i] != '\0')
 		i++;
@@ -70,6 +72,8 @@ char	*ft_strdup(const char *src)
 	size_t	i;
 	char	*dest;
 
+	if (!src)
+		return (NULL);
 	i = 0;
 	while (src[i])
 		i++;
@@ -90,6 +94,8 @@ size_t	ft_strlcpy(char *dst, const char *src, size_t size)
 {
 	size_t	i;
 
+	if (!src)
+		return (0);
 	i = 0;
 	if (size == 0)
 		return (ft_strlen(src));

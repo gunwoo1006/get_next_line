@@ -6,7 +6,7 @@
 /*   By: gkim <gkim@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/19 11:30:00 by gkim              #+#    #+#             */
-/*   Updated: 2026/02/19 15:42:47 by gkim             ###   ########.fr       */
+/*   Updated: 2026/05/26 14:09:27 by gkim             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,27 +43,36 @@ static char	*update_storage(char *storage)
 {
 	char	*new_storage;
 	size_t	i;
+	size_t	len;
 
 	if (!storage)
 		return (NULL);
 	i = 0;
 	while (storage[i] && storage[i] != '\n')
 		i++;
-	if (!storage[i])
-	{
-		free(storage);
-		return (NULL);
-	}
-	new_storage = (char *)malloc(ft_strlen(storage + i + 1) + 1);
-	if (!new_storage)
+	if (!storage[i] || !storage[i + 1])
 	{
 		free(storage);
 		return (NULL);
 	}
 	i++;
-	ft_strlcpy(new_storage, storage + i, ft_strlen(storage + i) + 1);
+	len = ft_strlen(storage + i);
+	new_storage = (char *)malloc(len + 1);
+	if (!new_storage)
+	{
+		free(storage);
+		return (NULL);
+	}
+	ft_strlcpy(new_storage, storage + i, len + 1);
 	free(storage);
 	return (new_storage);
+}
+
+static char	*free_all(char *buffer, char *storage)
+{
+	free(buffer);
+	free(storage);
+	return (NULL);
 }
 
 static char	*read_and_store(int fd, char *storage)
@@ -80,27 +89,16 @@ static char	*read_and_store(int fd, char *storage)
 	{
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
 		if (bytes_read == -1)
-		{
-			free(buffer);
-			free(storage);
-			return (NULL);
-		}
+			return (free_all(buffer, storage));
 		buffer[bytes_read] = '\0';
 		temp = ft_strjoin(storage, buffer);
 		free(storage);
+		if (!temp)
+			return (free_all(buffer, NULL));
 		storage = temp;
 	}
 	free(buffer);
 	return (storage);
-}
-
-static void	gnl_clear(char **storage)
-{
-	if (*storage)
-	{
-		free(*storage);
-		*storage = NULL;
-	}
 }
 
 char	*get_next_line(int fd)
@@ -109,13 +107,21 @@ char	*get_next_line(int fd)
 	char		*line;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
+	{
+		free(storage);
+		storage = NULL;
 		return (NULL);
-	if (read(fd, 0, 0) < 0)
-		return (gnl_clear(&storage), NULL);
+	}
 	storage = read_and_store(fd, storage);
 	if (!storage)
 		return (NULL);
 	line = extract_line(storage);
+	if (!line)
+	{
+		free(storage);
+		storage = NULL;
+		return (NULL);
+	}
 	storage = update_storage(storage);
 	return (line);
 }
